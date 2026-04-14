@@ -105,6 +105,92 @@ router.put("/:id", (req, res) => {
 
 });
 
+// Bulk Save API
+router.post("/bulk", async (req, res) => {
+    const { assessmentId, marks } = req.body;
+
+    try {
+        const assessment = db.prepare(`
+            SELECT totalMarks FROM assessments WHERE id =?    
+        `).get(assessmentId);
+
+        if (!assessment) {
+            return res.status(404).json({ error: "Assessment not found" });
+        }
+
+        const insert = db.prepare(`
+            INSERT INTO marks (studentId, subjectId, assessmentId, marksObtained, percentage, level)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `);
+
+        const update = db.prepare(`
+            UPDATE marks
+            SET marksObtained = ?, percentage = ?, level = ?
+            WHERE studentId = ? AND assessmentId = ?
+        `);
+
+        const getSubject = db.prepare(`
+            SELECT subjectId FROM assessments WHERE id = ?    
+        `);
+
+        const subject = getSubject.get(assessmentId);
+
+        const getLevel = (percentage) => {
+            if (percentage >= 80) return 7;
+            if (percentage >= 70) return 6;
+            if (percentage >= 60) return 5;
+            if (percentage >= 50) return 4;
+            if (percentage >= 40) return 3;
+            if (percentage >= 30) return 2;
+            return 1;
+        };
+
+        const results = [];
+
+        marks.forEach(m => {
+            const percentage = Math.round((m.marksObtained / assessment.totalMarks) * 100);
+            const level = getLevel(percentage);
+
+            const existing = db.prepare(`
+                SELECT id FROM marks
+                WHERE studentId = ? AND assessmentId = ?    
+            `).get(m.studentId, assessmentId);
+
+            if (existing) {
+                update.run(
+                    m.marksObtained,
+                    percentage,
+                    level,
+                    m.studentId,
+                    assessmentId
+                );
+            } else {
+                insert.run(
+                    m.studentId,
+                    subject.subjectId,
+                    assessmentId,
+                    m.marksObtained,
+                    percentage,
+                    level
+                );
+            }
+
+            results.push({
+                studentId: m.studentId,
+                percentage,
+                level
+            });
+        });
+
+        res.json({
+            message: "Bulk marks saved successfully",
+            results
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message});
+    }
+});
+
 // delete marks
 router.delete("/:id", (req, res) => {
     db.prepare("DELETE FROM marks WHERE id = ?").run(req.params.id);
