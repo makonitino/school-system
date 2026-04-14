@@ -11,6 +11,42 @@ db.prepare(`
         lastName TEXT,
         grade TEXT,
         class TEXT
-    )`).run();
+    )
+`).run();
+
+db.prepare(`
+    CREATE TABLE IF NOT EXISTS subjects (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    grade TEXT
+    )
+`).run();
+
+db.prepare(`
+    CREATE TABLE IF NOT EXISTS assessments (
+        id  INTEGER PRIMARY KEY AUTOINCREMENT,
+        subjectId INTEGER,
+        term TEXT,
+        type TEXT,
+        totalMarks INTEGER,
+        FOREIGN KEY (subjectId) REFERENCES subjects(ID)
+    )
+`).run();
+
+db.prepare(`
+    CREATE TABLE IF NOT EXISTS marks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        studentId INTEGER,
+        subjectId INTEGER,
+        assessmentId INTEGER,
+        marksObtained INTEGER,
+        percentage REAL,
+        level INTEGER,
+        UNIQUE(studentId, assessmentId)
+        FOREIGN KEY (studentId) REFERENCES students(id),
+        FOREIGN KEY (subjectId) REFERENCES subjects(id),
+        FOREIGN KEY (assessmentId) REFERENCES assessments(id)
+    )
+`).run();
 
 module.exports = db;;
