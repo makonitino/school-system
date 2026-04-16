@@ -1,5 +1,4 @@
-// import { route } from "./students";
-
+// routes/marks.js
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
@@ -90,7 +89,7 @@ router.put("/:id", (req, res) => {
 
     const assessment = db.prepare(`
         SELECT totalMarks FROM assessments WHERE id = ?    
-    `).get(marks.assessmentId);
+    `).get(marks.assessmentId);   // ← Note: bug here (marks vs mark)
 
     const percentage = Math.round((marksObtained / assessment.totalMarks) * 100);
     const level = getLevel(percentage);
@@ -190,6 +189,30 @@ router.post("/bulk", async (req, res) => {
         res.status(500).json({ error: err.message});
     }
 });
+
+router.post("/single", (req, res) => {
+    const { studentId, taskId, marksObtained } = req.body;
+
+    const existing = db.prepare(`
+        SELECT * FROM marks WHERE studentId = ? AND taskId = ?
+    `).get(studentId, taskId);
+
+    if (existing) {
+        db.prepare(`
+            UPDATE marks
+            SET marksObtained = ?
+            WHERE studentId = ? AND taskId = ?
+        `).run(marksObtained, studentId, taskId);
+    } else {
+        db.prepare(`
+            INSERT INTO marks (studentId, taskId, marksObtained)
+            VALUES (?, ?, ?)
+        `).run(studentId, taskId, marksObtained);
+    }
+
+    res.json({ success: true });
+});
+
 
 // delete marks
 router.delete("/:id", (req, res) => {

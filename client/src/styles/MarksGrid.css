@@ -1,0 +1,137 @@
+html {
+    margin-left: 40px;  
+    /* standard is 80% */
+}
+
+.content-table {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    min-width: 400px;
+    border-radius: 5px 5px 0 0;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.content-table thead th {
+    font-weight: 500;
+    font-size: 0.85em;
+}
+
+.content-table thead tr {
+    background-color: #009879;
+    color: white;
+    text-align: center;
+    /* font-weight: bold; */
+}
+
+.content-table th,
+.content-table td {
+    /* padding: 12px 13px; */
+    padding: 6px 8px; 
+    text-align: center;
+    vertical-align: middle;
+
+}
+
+/* .content-table th:first-child, */
+.content-table td:nth-child(2) {
+    width: 40%;
+    font-weight: bold;
+}
+
+.content-table th:not(:nth-child(1)):not(:nth-child(2)),
+.content-table td:not(:nth-child(1)):not(:nth-child(2)) {
+    width: 40px;
+    /* width: auto; */
+}
+
+.content-table th,
+.content-table td {
+    /* padding: 6px 8px;  */
+    text-align: center; /* center everything by default */
+}
+
+.content-table td:nth-child(2) {
+    text-align: left;
+}
+
+.content-table tbody tr {
+    /* border-bottom: 1px solid #dddddd; */
+    border-bottom: 1px solid #eee;
+}
+
+.content-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.content-table tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+
+.content-table input {
+    width: 100%;
+    border: none;
+    outline: none;
+    text-align: center;
+    background: transparent;
+
+    border-bottom: 1px solid #ccc;
+
+    font-size: 0.9em;
+    padding: 4px 0;
+    display: block;
+    margin: 0 auto; /* ensures centering */
+}
+
+.content-table input:focus {
+    border-bottom: 1px solid #009879;
+}
+
+
+/* Grid lines */
+
+.content-table thead th{
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.content-table tbody td:not(:nth-child(2)) {
+    border-left: 1px solid #eee;
+}
+
+/* Remove arrows in Chrome, Edge, Safari */
+.content-table input::-webkit-outer-spin-button,
+.content-table input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Remove arrows in Firefox */
+.content-table input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+.number-col {
+    width: 40px;
+    text-align: center !important;
+    font-size: 0.8em;
+    color: #666;
+}
+
+.sort-icon {
+    display: block;
+    font-size: 0.7em;
+    margin-top: 2px;
+    color: rgba(255,255,255,0.7);
+}
+
+/* .totals-row td,
+.points-row td {
+    font-size: 0.8em;
+    color: #555;
+}
+
+.totals-row td strong,
+.points-row td strong {
+    color: #222;
+} */

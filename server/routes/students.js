@@ -20,6 +20,7 @@ router.post("/", (req, res) => {
 router.get("/", (req, res) => {
     const students = db.prepare("SELECT * FROM students").all();
     res.json(students);
+
 });
 
 // GET single student

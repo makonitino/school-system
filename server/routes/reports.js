@@ -2,57 +2,61 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db");
 
-// GET class marks grid
 router.get("/class-grid", (req, res) => {
     const { class: studentClass, subjectId, term } = req.query;
 
-    // 1. Get students in class
     const students = db.prepare(`
-        SELECT * FROM students WHERE class = ?    
+        SELECT * FROM students WHERE class = ?
     `).all(studentClass);
 
-    // 2. Get assessments for subjects + term
     const assessments = db.prepare(`
         SELECT * FROM assessments
-        WHERE subjectId = ? AND term = ?    
+        WHERE subjectId = ? AND term = ?
     `).all(subjectId, term);
 
-    // 3. Build grid
-    const result =  students.map(student => {
-        let total = 0;
-        let count = 0;
+    const assessmentsWithTasks = assessments.map(a => {
+        const tasks = db.prepare(`
+            SELECT * FROM tasks WHERE assessmentId = ?
+        `).all(a.id);
 
-        const marks = assessments.map(assessment => {
-            const mark = db.prepare(`
-                SELECT marksObtained, percentage FROM marks
-                WHERE studentId = ? AND assessmentId = ?    
-            `).get(student.id, assessment.id);
+        return { ...a, tasks };
+    });
 
-            if (mark) {
-                total += mark.percentage;
-                count++;
-            }
+    const studentData = students.map(student => {
+
+        const assessmentResults = assessmentsWithTasks.map(assessment => {
+
+            const taskResults = assessment.tasks.map(task => {
+
+                const mark = db.prepare(`
+                    SELECT marksObtained FROM marks
+                    WHERE studentId = ? AND taskId = ?
+                `).get(student.id, task.id);
+
+                return {
+                    taskId: task.id,
+                    name: task.name,
+                    marksObtained: mark ? mark.marksObtained : "",
+                };
+            });
 
             return {
                 assessmentId: assessment.id,
                 name: assessment.type,
-                mark: mark ? mark.marksObtained : null
+                tasks: taskResults
             };
         });
-
-        const average = count > 0 ? Math.round(total/count) : null;
 
         return {
             studentId: student.id,
             name: `${student.firstName} ${student.lastName}`,
-            marks,
-            average
+            assessments: assessmentResults
         };
     });
 
     res.json({
-        assessments,
-        students: result,
+        assessments: assessmentsWithTasks,
+        students: studentData,
         term
     });
 });
